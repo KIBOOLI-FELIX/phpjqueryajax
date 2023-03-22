@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PHPJQUERYAJAX</title>
+  <link href="dist/bootstrap.min.css" rel="stylesheet">
+  <link href="dist/toastr/toastr.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container formc-container mt-4">
+    <div class="card">
+      <div class="card-header">
+        <h1>Family members table</h1>
+      </div>
+      <div class="card-body">
+       <form action="process/store.php">
+        <div class="row">
+          <div class="form-group col-md-6">
+            <label>Full Name</label>
+            <input type="text" class="form-control" name="name" id="name">
+          </div>
+          <div class="form-group col-md-6">
+            <label>Designation</label>
+            <input type="text" class="form-control" name="occupation" id="occup">
+          </div>
+        </div>
+        <div class="row">
+          <div class="form-group col-md-6">
+            <label>Age</label>
+            <input type="text" class="form-control" name="age" id="age">
+          </div>
+          <div class="form-group col-md-6">
+            <label>Contact</label>
+            <input type="text" class="form-control" name="phone" id="phone">
+          </div>
+        </div>
+        <div class="form-group mt-3 text-center">
+          <input type="submit" class="btn btn-primary" value="Submit" name="phone" id="savebtn">
+        </div>
+       </form>
+      </div>
+    </div>
+  </div>
+  <div class="container table-container mt-4">
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Designation</th>
+          <th>Age</th>
+          <th>Contact</th>
+        </tr>
+      </thead>
+      <tbody class="tabledata">
+      </tbody>
+    </table>
+  </div>
+  
+  <script src="dist/jquery-3.6.0.min.js"></script>
+  <!-- <script
+  src="https://code.jquery.com/jquery-3.6.4.js"
+  integrity="sha256-a9jBBRygX1Bh5lt8GZjXDzyOB+bWve9EiO7tROUtj/E="
+  crossorigin="anonymous"></script> -->
+  <script src="dist/bootstrap.bundle.min.js"></script>
+  <script src="dist/toastr/toastr.js"></script>
+  <script>
+    $(document).ready(function(){
+      //toastr options
+      var type="";
+      toastr.options = {
+            "debug": false,
+            "newestOnTop": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": (type === "error") ?
+                (1000 * 30) : 6000,
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut",
+            "closeButton": true
+        };
+
+      //jqueryajax to collect form data and save
+      $("form").submit(function(e){
+        e.preventDefault()//prevents to form from redirecting to the specified action attribute;
+        var route=$("form").attr("action");// getting the action attribute of the form(url);
+        var data=$("form").serializeArray();
+        console.log(data);
+        $.ajax({
+        method:"POST",
+        url: route,
+        data:data,
+        success: function (response) {
+          $message=JSON.parse(response)//converting php encoded result into script json
+          toastr.success($message.success);
+          // console.log($message.success);
+        }
+      });
+      })
+
+      //jqueryajax to populate data from the database into the table
+      var base_url="http://localhost/phpjqueryajax/";
+      function retrieveData(){
+        $.ajax({
+        method:"GET",
+        url: base_url+"process/retrieve.php",
+        success: function (response) {
+          $data=JSON.parse(response);//collecting data echoed from php script
+          // console.log($data);
+          //inserting data into the table
+          $.each($data, function (index, value) { 
+             console.log(value["name"]);
+
+             $(".tabledata").append("<tr>\
+              <td>"+value["name"]+"</td>\
+              <td>"+value["designation"]+"</td>\
+              <td>"+value["age"]+"</td>\
+              <td>"+value["contact"]+"</td>\
+              </tr>");
+          });
+        }
+      });
+      }
+      retrieveData();//calling the function to run
+      
+    })
+  </script>
+</body>
+</html>
